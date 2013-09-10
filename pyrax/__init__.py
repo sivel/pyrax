@@ -40,6 +40,11 @@ from functools import wraps
 import inspect
 import logging
 import os
+import pkgutil
+import itertools
+import glob
+import pkg_resources
+import sys
 
 # keyring is an optional import
 try:
@@ -142,6 +147,80 @@ def _import_identity(import_str):
     full_str = "pyrax.identity.%s" % import_str
     return utils.import_class(full_str)
 
+
+def _discover_extensions():
+    global _client_classes
+    g = globals()
+    connectors = []
+    for name, module in itertools.chain(
+            _discover_via_python_path(),
+            _discover_via_contrib_path(),
+            _discover_via_entry_points()):
+
+        try:
+            clients = module.CLIENTS
+        except AttributeError:
+            continue
+
+        for client in clients:
+            try:
+                class_name = client['class'].__name__
+            except (AttributeError, KeyError):
+                continue
+            else:
+                client_name = client.get('name',
+                    class_name.lower().replace('client', ''))
+                g[class_name] = client['class']
+                _client_classes[client_name] = client['class']
+
+            try:
+                connector_name = client['connector'].__name__
+            except (AttributeError, KeyError):
+                connector_name = 'connect_to_%s' % name
+                g[connector_name] = _create_client
+                connectors.append((client_name, _create_client))
+            else:
+                g[connector_name] = client['connector']
+                connectors.append((client_name, client['connector']))
+
+    return connectors
+
+
+def _discover_via_python_path():
+    for (module_loader, name, _ispkg) in pkgutil.iter_modules():
+        if name.startswith('pyrax_ext_'):
+            if not hasattr(module_loader, 'load_module'):
+                # Python 2.6 compat: actually get an ImpImporter obj
+                module_loader = module_loader.find_module(name)
+
+            module = module_loader.load_module(name)
+            if hasattr(module, 'extension_name'):
+                name = module.extension_name
+
+            yield name, module
+
+
+def _discover_via_contrib_path():
+    module_path = os.path.dirname(os.path.abspath(__file__))
+    ext_path = os.path.join(module_path, 'contrib')
+    ext_glob = os.path.join(ext_path, "*.py")
+
+    for ext_path in glob.iglob(ext_glob):
+        name = os.path.basename(ext_path)[:-3]
+
+        if name == "__init__":
+            continue
+
+        module = imp.load_source(name, ext_path)
+        yield name, module
+
+
+def _discover_via_entry_points():
+    for ep in pkg_resources.iter_entry_points('pyrax.extension'):
+        name = ep.name
+        module = ep.load()
+
+        yield name, module
 
 
 class Settings(object):
@@ -569,6 +648,7 @@ def connect_to_services(region=None):
     global cloudservers, cloudfiles, cloud_loadbalancers, cloud_databases
     global cloud_blockstorage, cloud_dns, cloud_networks, cloud_monitoring
     global autoscale
+    g = globals()
     cloudservers = connect_to_cloudservers(region=region)
     cloudfiles = connect_to_cloudfiles(region=region)
     cloud_loadbalancers = connect_to_cloud_loadbalancers(region=region)
@@ -578,6 +658,11 @@ def connect_to_services(region=None):
     cloud_networks = connect_to_cloud_networks(region=region)
     cloud_monitoring = connect_to_cloud_monitoring(region=region)
     autoscale = connect_to_autoscale(region=region)
+    for name, connector in _ext_connectors:
+        if connector is _create_client:
+            g[name] = _create_client(name, name, region)
+        elif connector:
+            g[name] = connector(region=region)
 
 
 def _get_service_endpoint(svc, region=None, public=True):
@@ -765,3 +850,6 @@ if os.path.exists(config_file):
     settings.read_config(config_file)
     debug = get_setting("http_debug") or False
     set_http_debug(debug)
+
+# Find Extensions
+_ext_connectors = _discover_extensions()
