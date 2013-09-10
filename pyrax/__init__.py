@@ -132,22 +132,40 @@ _client_classes = {
         "monitor": CloudMonitorClient,
         "autoscale": AutoScaleClient,
         }
+
+_identity_classes = {
+    "rackspace": "pyrax.identity.rax_identity.RaxIdentity",
+    "rax_identity.RaxIdentity": "pyrax.identity.rax_identity.RaxIdentity",
+    "keystone": "pyrax.identity.keystone_identity.KeystoneIdentity",
+    "keystone_identity.KeystoneIdentity":
+        "pyrax.identity.keystone_identity.KeystoneIdentity"
+}
+
 _ext_connectors = []
 
 
 def _id_type(ityp):
     """Allow for shorthand names for the most common types."""
-    if ityp.lower() == "rackspace":
-        ityp = "rax_identity.RaxIdentity"
-    elif ityp.lower() == "keystone":
-        ityp = "keystone_identity.KeystoneIdentity"
+    if ityp.lower() in _identity_classes:
+        ityp = _identity_classes.get(ityp.lower())
     return ityp
 
 
-def _import_identity(import_str):
-    import_str = _id_type(import_str)
-    full_str = "pyrax.identity.%s" % import_str
-    return utils.import_class(full_str)
+def _import_identity(import_cls):
+    import_cls = _id_type(import_cls)
+    if isinstance(import_cls, basestring):
+        return utils.import_class(import_cls)
+    return import_cls
+
+
+class IdentityClass(type):
+    def __init__(cls, name, bases, dct):
+        global _client_classes
+        g = globals()
+        identity_name = dct.get('name', name.lower().replace('identity', ''))
+        g[name] = cls
+        _identity_classes[identity_name] = cls
+        super(IdentityClass, cls).__init__(name, bases, dct)
 
 
 class ClientClass(type):
