@@ -180,6 +180,7 @@ class ClientClass(type):
 
 def connector(client_name=None):
     connector.client_name = client_name
+
     def _decorator(func):
         global _ext_connectors
         g = globals()
@@ -191,6 +192,7 @@ def connector(client_name=None):
         g[connector_name] = func
         _ext_connectors.append((client_name, func))
         return func
+
     return _decorator
 
 
