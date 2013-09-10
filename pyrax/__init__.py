@@ -131,6 +131,7 @@ _client_classes = {
         "monitor": CloudMonitorClient,
         "autoscale": AutoScaleClient,
         }
+_ext_connectors = []
 
 
 def _id_type(ityp):
@@ -148,42 +149,37 @@ def _import_identity(import_str):
     return utils.import_class(full_str)
 
 
-def _discover_extensions():
-    global _client_classes
-    g = globals()
-    connectors = []
-    for name, module in itertools.chain(
-            _discover_via_python_path(),
-            _discover_via_contrib_path(),
-            _discover_via_entry_points()):
+class ClientClass(type):
+    def __init__(cls, name, bases, dct):
+        global _client_classes
+        g = globals()
+        client_name = dct.get('name', name.lower().replace('client', ''))
+        g[name] = cls
+        _client_classes[client_name] = cls
+        super(ClientClass, cls).__init__(name, bases, dct)
 
+
+def add_connector(client_name):
+    def _decorator(func):
+        global _ext_connectors
+        g = globals()
         try:
-            clients = module.CLIENTS
-        except AttributeError:
-            continue
+            connector_name = func.__name__
+        except (AttributeError, KeyError):
+            connector_name = 'connect_to_%s' % client_name
+            g[connector_name] = _create_client
+            _ext_connectors.append((client_name, _create_client))
+        else:
+            g[connector_name] = func
+            _ext_connectors.append((client_name, func))
+        return func
+    return _decorator
 
-        for client in clients:
-            try:
-                class_name = client['class'].__name__
-            except (AttributeError, KeyError):
-                continue
-            else:
-                client_name = client.get('name',
-                    class_name.lower().replace('client', ''))
-                g[class_name] = client['class']
-                _client_classes[client_name] = client['class']
 
-            try:
-                connector_name = client['connector'].__name__
-            except (AttributeError, KeyError):
-                connector_name = 'connect_to_%s' % name
-                g[connector_name] = _create_client
-                connectors.append((client_name, _create_client))
-            else:
-                g[connector_name] = client['connector']
-                connectors.append((client_name, client['connector']))
-
-    return connectors
+def _discover_extensions():
+    _discover_via_python_path()
+    _discover_via_contrib_path()
+    _discover_via_entry_points()
 
 
 def _discover_via_python_path():
@@ -193,11 +189,7 @@ def _discover_via_python_path():
                 # Python 2.6 compat: actually get an ImpImporter obj
                 module_loader = module_loader.find_module(name)
 
-            module = module_loader.load_module(name)
-            if hasattr(module, 'extension_name'):
-                name = module.extension_name
-
-            yield name, module
+            module_loader.load_module(name)
 
 
 def _discover_via_contrib_path():
@@ -211,16 +203,12 @@ def _discover_via_contrib_path():
         if name == "__init__":
             continue
 
-        module = imp.load_source(name, ext_path)
-        yield name, module
+        imp.load_source(name, ext_path)
 
 
 def _discover_via_entry_points():
     for ep in pkg_resources.iter_entry_points('pyrax.extension'):
-        name = ep.name
         module = ep.load()
-
-        yield name, module
 
 
 class Settings(object):
@@ -852,4 +840,4 @@ if os.path.exists(config_file):
     set_http_debug(debug)
 
 # Find Extensions
-_ext_connectors = _discover_extensions()
+_discover_extensions()
