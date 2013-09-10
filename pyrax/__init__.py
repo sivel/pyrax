@@ -135,9 +135,9 @@ _client_classes = {
 
 _identity_classes = {
     "rackspace": "pyrax.identity.rax_identity.RaxIdentity",
-    "rax_identity.RaxIdentity": "pyrax.identity.rax_identity.RaxIdentity",
+    "rax_identity.raxidentity": "pyrax.identity.rax_identity.RaxIdentity",
     "keystone": "pyrax.identity.keystone_identity.KeystoneIdentity",
-    "keystone_identity.KeystoneIdentity":
+    "keystone_identity.keystoneidentity":
         "pyrax.identity.keystone_identity.KeystoneIdentity"
 }
 
