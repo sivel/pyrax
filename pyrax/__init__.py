@@ -159,19 +159,18 @@ class ClientClass(type):
         super(ClientClass, cls).__init__(name, bases, dct)
 
 
-def add_connector(client_name):
+def add_connector(client_name=None):
+    add_connector.client_name = client_name
     def _decorator(func):
         global _ext_connectors
         g = globals()
-        try:
-            connector_name = func.__name__
-        except (AttributeError, KeyError):
-            connector_name = 'connect_to_%s' % client_name
-            g[connector_name] = _create_client
-            _ext_connectors.append((client_name, _create_client))
+        if add_connector.client_name is None:
+            client_name = func.__name__.replace('connect_to_', '')
         else:
-            g[connector_name] = func
-            _ext_connectors.append((client_name, func))
+            client_name = add_connector.client_name
+        connector_name = func.__name__
+        g[connector_name] = func
+        _ext_connectors.append((client_name, func))
         return func
     return _decorator
 
