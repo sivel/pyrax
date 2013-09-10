@@ -45,6 +45,7 @@ import itertools
 import glob
 import pkg_resources
 import sys
+import imp
 
 # keyring is an optional import
 try:
@@ -159,15 +160,15 @@ class ClientClass(type):
         super(ClientClass, cls).__init__(name, bases, dct)
 
 
-def add_connector(client_name=None):
-    add_connector.client_name = client_name
+def connector(client_name=None):
+    connector.client_name = client_name
     def _decorator(func):
         global _ext_connectors
         g = globals()
-        if add_connector.client_name is None:
+        if connector.client_name is None:
             client_name = func.__name__.replace('connect_to_', '')
         else:
-            client_name = add_connector.client_name
+            client_name = connector.client_name
         connector_name = func.__name__
         g[connector_name] = func
         _ext_connectors.append((client_name, func))
