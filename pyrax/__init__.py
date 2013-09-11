@@ -41,10 +41,8 @@ import inspect
 import logging
 import os
 import pkgutil
-import itertools
 import glob
 import pkg_resources
-import sys
 import imp
 
 # keyring is an optional import
