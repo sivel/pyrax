@@ -196,7 +196,6 @@ def connector(client_name=None):
 
 def _discover_extensions():
     _discover_via_python_path()
-    _discover_via_contrib_path()
     _discover_via_entry_points()
 
 
@@ -208,20 +207,6 @@ def _discover_via_python_path():
                 module_loader = module_loader.find_module(name)
 
             module_loader.load_module(name)
-
-
-def _discover_via_contrib_path():
-    module_path = os.path.dirname(os.path.abspath(__file__))
-    ext_path = os.path.join(module_path, 'contrib')
-    ext_glob = os.path.join(ext_path, "*.py")
-
-    for ext_path in glob.iglob(ext_glob):
-        name = os.path.basename(ext_path)[:-3]
-
-        if name == "__init__":
-            continue
-
-        imp.load_source(name, ext_path)
 
 
 def _discover_via_entry_points():
