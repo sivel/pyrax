@@ -455,7 +455,7 @@ class ScalingGroupManager(BaseManager):
                         "networks": networks or srv_args.get("networks"),
                         "metadata": metadata or srv_args.get("metadata"),
                     },
-                    "loadBalancers": load_balancers or lb_args,
+                    "loadBalancers": self._resolve_lbs(load_balancers or lb_args),
                 },
             }
         key_name = key_name or srv_args.get("key_name")
