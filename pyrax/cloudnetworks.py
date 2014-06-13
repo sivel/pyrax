@@ -31,11 +31,11 @@ PSEUDO_NETWORKS = (PUBLIC_NET_ID, SERVICE_NET_ID)
 
 def _get_server_networks(network, public=False, private=False):
     net_id = utils.get_id(network)
-    ret = [{"net-id": net_id}]
+    ret = [{"uuid": net_id}]
     if public:
-        ret.append({"net-id": PUBLIC_NET_ID})
+        ret.append({"uuid": PUBLIC_NET_ID})
     if private:
-        ret.append({"net-id": SERVICE_NET_ID})
+        ret.append({"uuid": SERVICE_NET_ID})
     return ret
 
 
