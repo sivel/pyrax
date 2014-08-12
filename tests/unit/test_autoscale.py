@@ -551,7 +551,16 @@ class AutoscaleTest(unittest.TestCase):
         sg.launchConfiguration = {}
         body = {"type": "launch_server",
                 "args": {
-                    "server": key_name,
+                    "server": {
+                        "name": name,
+                        "imageRef": img,
+                        "flavorRef": flv,
+                        "OS-DCF:diskConfig": dconfig,
+                        "networks": networks,
+                        "metadata": metadata,
+                        "key_name": key_name,
+                        "personality": personality,
+                    },
                     "loadBalancers": lbs,
                 },
             }
