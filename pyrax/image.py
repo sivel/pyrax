@@ -19,7 +19,6 @@
 
 from functools import wraps
 
-import pyrax
 from pyrax.object_storage import StorageObject
 from pyrax.client import BaseClient
 import pyrax.exceptions as exc
@@ -340,7 +339,7 @@ class ImageManager(BaseManager):
         body = {"status": status}
         try:
             resp, resp_body = self.api.method_put(uri, body=body)
-        except exc.NotFound as e:
+        except exc.NotFound:
             raise exc.InvalidImageMember("The update member request could not "
                     "be completed. No member request for that image was found.")
 

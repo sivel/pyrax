@@ -48,17 +48,17 @@ except ImportError:
 # since importing the version info in setup.py tries to import this
 # entire module.
 try:
-    from .identity import *
+    from .identity import *  # NOQA
 
     from . import exceptions as exc
-    from . import http
+    from . import http  # NOQA
     from . import version
 
     from novaclient import exceptions as _cs_exceptions
     from novaclient import auth_plugin as _cs_auth_plugin
     from novaclient.shell import OpenStackComputeShell as _cs_shell
     from novaclient.v1_1 import client as _cs_client
-    from novaclient.v1_1.servers import Server as CloudServer
+    from novaclient.v1_1.servers import Server as CloudServer  # NOQA
 
     from .autoscale import AutoScaleClient
     from .clouddatabases import CloudDatabaseClient

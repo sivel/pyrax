@@ -24,7 +24,6 @@ import re
 
 from six.moves import urllib
 
-import pyrax
 from pyrax.client import BaseClient
 import pyrax.exceptions as exc
 from pyrax.manager import BaseManager
@@ -593,7 +592,7 @@ class QueueClient(BaseClient):
         Returns True or False, depending on the existence of the named queue.
         """
         try:
-            queue = self._manager.head(name)
+            self._manager.head(name)
             return True
         except exc.NotFound:
             return False

@@ -676,9 +676,6 @@ class ScalingGroupManager(BaseManager):
         uri = "/%s/%s/policies/%s/webhooks/%s" % (self.uri_base,
                 utils.get_id(scaling_group), utils.get_id(policy),
                 utils.get_id(webhook))
-        group_id = utils.get_id(scaling_group)
-        policy_id = utils.get_id(policy)
-        webhook_id = utils.get_id(webhook)
         body = self._create_webhook_body(name, metadata=metadata)
         resp, resp_body = self.api.method_put(uri, body=body)
 

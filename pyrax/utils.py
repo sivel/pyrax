@@ -28,7 +28,6 @@ trace = pudb.set_trace
 
 import six
 
-import pyrax
 import pyrax.exceptions as exc
 
 
@@ -489,7 +488,6 @@ def _parse_datetime_string(val):
     returns a datetime if successful. If not, a InvalidDateTimeString exception
     will be raised.
     """
-    dt = None
     lenval = len(val)
     fmt = {19: "%Y-%m-%d %H:%M:%S", 10: "%Y-%m-%d"}.get(lenval)
     if fmt is None:

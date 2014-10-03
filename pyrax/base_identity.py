@@ -6,10 +6,7 @@ from __future__ import absolute_import
 
 import six.moves.configparser as ConfigParser
 import datetime
-import json
 import re
-import requests
-import warnings
 
 try:
     import keyring
@@ -365,13 +362,15 @@ class BaseIdentity(object):
                     "accessing the context.")
         # First see if it's a service
         att = self.service_mapping.get(att) or att
-        svc = self.services.get(att)
-        if svc is not None:
-            return svc.endpoints
+        service = self.services.get(att)
+        if service is not None:
+            return service.endpoints
         # Either invalid service, or a region
-        ret = utils.DotDict([(stype, svc.endpoints.get(att))
-                for stype, svc in list(self.services.items())
-                if svc.endpoints.get(att) is not None])
+        ret = utils.DotDict()
+        for stype, svc in self.services.items():
+            if svc.endpoints.get(att) is None:
+                continue
+            ret[stype] = svc.endpoints.get(att)
         ret._att_mapper.update(self.service_mapping)
         if ret:
             return ret
@@ -508,13 +507,16 @@ class BaseIdentity(object):
         Returns the current credentials in the format expected by
         the authentication service.
         """
-        tenant_name = self.tenant_name or self.username
         tenant_id = self.tenant_id or self.username
-        return {"auth": {"passwordCredentials":
-                {"username": self.username,
-                "password": self.password,
+        return {
+            "auth": {
+                "passwordCredentials": {
+                    "username": self.username,
+                    "password": self.password,
                 },
-                "tenantId": tenant_id}}
+                "tenantId": tenant_id
+            }
+        }
 
 
     # The following method_* methods wrap the _call() method.

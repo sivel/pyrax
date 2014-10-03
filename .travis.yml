@@ -8,8 +8,8 @@ install:
   - pip install -U setuptools tox coveralls
 
 script:
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then tox -e pep8,py27; fi
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "pypy" ]]; then tox -e pep8,pypy; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then tox -e flake8,py27; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "pypy" ]]; then tox -e flake8,pypy; fi
 
 after_success:
   - coveralls

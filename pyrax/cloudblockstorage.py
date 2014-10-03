@@ -143,7 +143,7 @@ class CloudBlockStorageVolume(BaseResource):
         """
         instance_id = _resolve_id(instance)
         try:
-            resp = self._nova_volumes.create_server_volume(instance_id,
+            self._nova_volumes.create_server_volume(instance_id,
                     self.id, mountpoint)
         except Exception as e:
             raise exc.VolumeAttachmentFailed("%s" % e)

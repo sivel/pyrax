@@ -1034,7 +1034,7 @@ class CloudDNSManager(BaseManager):
         try:
             resp, resp_body = self._async_call(uri, body=body, method="PUT",
                     has_response=False, error_class=exc.PTRRecordUpdateFailed)
-        except exc.EndpointNotFound as e:
+        except exc.EndpointNotFound:
             raise exc.InvalidPTRRecord("The record domain/IP address "
                     "information is not valid for this device.")
         return resp_body.get("status") == "COMPLETED"

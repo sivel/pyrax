@@ -84,7 +84,7 @@ class CloudNetwork(BaseResource):
         """
         try:
             return super(CloudNetwork, self).delete()
-        except exc.Forbidden as e:
+        except exc.Forbidden:
             # Network is in use
             raise exc.NetworkInUse("Cannot delete a network in use by a server.")
 
@@ -175,7 +175,7 @@ class CloudNetworkClient(BaseClient):
         """
         try:
             return super(CloudNetworkClient, self).delete(network)
-        except exc.Forbidden as e:
+        except exc.Forbidden:
             # Network is in use
             raise exc.NetworkInUse("Cannot delete a network in use by a server.")
 

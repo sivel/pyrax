@@ -24,7 +24,6 @@ import datetime
 from functools import wraps
 import hashlib
 import hmac
-import json
 import logging
 import math
 import mimetypes
@@ -1126,7 +1125,7 @@ class ContainerManager(BaseManager):
         hmac_body = "%s\n%s\n%s" % (mod_method, expires, pth)
         try:
             sig = hmac.new(key, hmac_body, hashlib.sha1).hexdigest()
-        except TypeError as e:
+        except TypeError:
             raise exc.UnicodePathError("Due to a bug in Python, the TempURL "
                     "function only works with ASCII object paths.")
         temp_url = "%s%s?temp_url_sig=%s&temp_url_expires=%s" % (base_url, pth,
@@ -1499,7 +1498,6 @@ class ContainerManager(BaseManager):
         container, new_ctype can be set to None. Failure during the put will
         result in an exception.
         """
-        cname = utils.get_name(container)
         oname = utils.get_name(obj)
         if guess and container.cdn_enabled:
             # Test against the CDN url to guess the content-type.
@@ -1927,7 +1925,6 @@ class StorageObjectManager(BaseManager):
         Handles the low-level creation of a storage object and the uploading of
         the contents of that object.
         """
-        head_etag = headers.pop("ETag", "")
         if chunked:
             headers.pop("Content-Length", "")
             headers["Transfer-Encoding"] = "chunked"
@@ -3206,7 +3203,7 @@ class StorageClient(BaseClient):
         mthd = self.method_dict.get(method.upper())
         try:
             resp, resp_body = mthd(cdn_uri, *args, **kwargs)
-        except exc.NotFound as e:
+        except exc.NotFound:
             # This could be due to either the container does not exist, or that
             # the container exists but is not CDN-enabled.
             try:
@@ -3317,7 +3314,6 @@ class BulkDeleter(threading.Thread):
 
 
     def run(self):
-        client = self.client
         container = self.container
         object_names = self.object_names
         cname = utils.get_name(container)
@@ -3330,6 +3326,5 @@ class BulkDeleter(threading.Thread):
         uri = "/?bulk-delete=1"
         resp, resp_body = self.client.method_delete(uri, data=body,
                 headers=headers)
-        status = resp_body.get("Response Status", "").split(" ")[0]
         self.results = resp_body
         self.completed = True

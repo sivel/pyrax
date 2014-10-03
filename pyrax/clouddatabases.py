@@ -260,7 +260,7 @@ class CloudDatabaseUserManager(BaseManager):
         uri = "/%s/%s/databases" % (self.uri_base, user)
         try:
             resp, resp_body = self.api.method_get(uri)
-        except exc.NotFound as e:
+        except exc.NotFound:
             raise exc.NoSuchDatabaseUser("User '%s' does not exist." % user)
         dbs = resp_body.get("databases", {})
         return [CloudDatabaseDatabase(self, db) for db in dbs]
@@ -281,7 +281,7 @@ class CloudDatabaseUserManager(BaseManager):
         body = {"databases": dbs}
         try:
             resp, resp_body = self.api.method_put(uri, body=body)
-        except exc.NotFound as e:
+        except exc.NotFound:
             raise exc.NoSuchDatabaseUser("User '%s' does not exist." % user)
 
 
@@ -294,7 +294,6 @@ class CloudDatabaseUserManager(BaseManager):
         """
         user = utils.get_name(user)
         db_names = self._get_db_names(db_names, strict=strict)
-        bad_names = []
         for db_name in db_names:
             uri = "/%s/%s/databases/%s" % (self.uri_base, user, db_name)
             resp, resp_body = self.api.method_delete(uri)

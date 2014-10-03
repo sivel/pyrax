@@ -25,9 +25,6 @@ OpenStack Client interface. Handles the REST calls and responses.
 
 from __future__ import absolute_import
 
-import json
-import logging
-import requests
 import time
 from six.moves import urllib
 

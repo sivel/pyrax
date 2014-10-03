@@ -17,11 +17,12 @@ its own issues with consistency.
 
 There are several other places where pyrax differs from the "pure" PEP8
 suggestions. Please remember that PEP8 is a guideline, not an absolute
-dictum. Here is the command I use to run the pep8 tool:
+dictum. Here is the command to run the flake8 tool which performs pep8
+and pyflakes checks:
 
 ::
 
-    tox -e pep8
+    tox -e flake8
 
 Any pull requests to address style differences between the above command
 and your interpretation of PEP8 will be rejected.

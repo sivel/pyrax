@@ -54,7 +54,6 @@ from pyrax.object_storage import StorageObject
 from pyrax.object_storage import StorageObjectManager
 from pyrax.queueing import Queue
 from pyrax.queueing import QueueClaim
-from pyrax.queueing import QueueMessage
 from pyrax.queueing import QueueClient
 from pyrax.queueing import QueueManager
 
@@ -63,7 +62,6 @@ from pyrax.base_identity import BaseIdentity
 from pyrax.base_identity import Endpoint
 from pyrax.base_identity import Service
 from pyrax.identity.rax_identity import RaxIdentity
-from pyrax.identity.keystone_identity import KeystoneIdentity
 import pyrax.utils as utils
 
 
@@ -343,7 +341,6 @@ class FakeBlockStorageManager(CloudBlockStorageManager):
 
 class FakeBlockStorageVolume(CloudBlockStorageVolume):
     def __init__(self, *args, **kwargs):
-        volname = utils.random_unicode(8)
         self.id = utils.random_unicode()
         self.manager = FakeBlockStorageManager()
         self._nova_volumes = FakeNovaVolumeClient()
